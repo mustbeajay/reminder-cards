@@ -6,6 +6,9 @@ const hometown = document.querySelector("#hometown");
 const purpose = document.querySelector("#purpose");
 const categoryError = document.querySelector("#category-error");
 
+const container = document.querySelector("#card-container");
+const upBtn = document.querySelector("#upBtn");
+const downBtn = document.querySelector("#downBtn");
 
 
 // Handling Form open-close
@@ -84,9 +87,15 @@ form.addEventListener("submit", (e) => {
 
   if (!formError) {
     // Save Data in Local Storage.
-
+    saveData(
+      imgurl.value,
+      fullname.value,
+      hometown.value,
+      purpose.value,
+      selectedCategory.id
+    );
     // Show Data in cards
-
+    showData() // reflects changes in cards as soon form submitted.
     // Remove Error messages, Reset and Hide form
     formContainer.style.display="none"
     form.reset();
@@ -106,3 +115,83 @@ document.querySelectorAll("input[name='pref']").forEach((radio) => {
     categoryError.style.display = "none";
   });
 });
+
+
+// Saving Data to localStorage
+function saveData(imgurl, fullname, hometown, purpose, preference) {
+  if (localStorage.getItem("reminders") === null) {
+    let oldReminders = [];
+
+    oldReminders.push({
+      imgurl: imgurl,
+      fullname: fullname,
+      hometown: hometown,
+      purpose: purpose,
+      preference: preference,
+    });
+    oldReminders = JSON.stringify(oldReminders);
+    localStorage.setItem("reminders", oldReminders);
+  } else {
+    let oldReminders = JSON.parse(localStorage.getItem("reminders"));
+    console.log(oldReminders);
+    oldReminders.push({
+      imgurl: imgurl,
+      fullname: fullname,
+      hometown: hometown,
+      purpose: purpose,
+      preference: preference,
+    });
+    oldReminders = JSON.stringify(oldReminders);
+    localStorage.setItem("reminders", oldReminders);
+  }
+}
+
+// Showing Data on Cards
+function showData() {
+  container.innerHTML=""
+  let reminders = JSON.parse(localStorage.getItem("reminders"));
+  if(reminders){
+    reminders.forEach((person) => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+
+    card.innerHTML = `
+            <img src="${person.imgurl}" alt="${person.fullname}">
+            <h4 class="card-username">${person.fullname}</h4>
+            <div class="hometown-div">
+                <span>Hometown</span>
+                <span>${person.hometown}</span>
+            </div>
+            <div class="purpose-div">
+                <span>Purpose</span>
+                <span>${person.purpose}</span>
+            </div>
+            <div class="action-div">
+                <button><i class="ri-phone-fill"></i> Call</button>
+                <button>Message</button>
+            </div>
+        `;
+
+    container.appendChild(card);
+  });
+  }
+  
+}
+showData() // Shows the cards on page load
+
+
+// Navigate Between cards using up & down button
+
+
+upBtn.addEventListener("click",function(){
+  let lastElem=container.lastElementChild
+  if(lastElem){
+      container.insertBefore(lastElem,container.firstElementChild)
+  }
+})
+downBtn.addEventListener("click",function(){
+  let firstElem=container.firstElementChild
+  if(firstElem){
+      container.appendChild(firstElem)
+  }
+})
